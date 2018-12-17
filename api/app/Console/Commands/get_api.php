@@ -6,6 +6,8 @@ use Illuminate\Console\Command;
 use App\Repositories\ApiRepository;
 use App\Services\GetApiService;
 use App\Jobs\Saveapi;
+use \Exception;
+
 class Get_api extends Command
 {
     /**
@@ -44,8 +46,25 @@ class Get_api extends Command
 
     public function handle()
     {
-        $getApi = new GetApiService($this->apiRepository);
-        $data = $getApi->getApi(0);
-        $getApi->getAllData($data);
+        try {
+            $date = $this->ask('Please enter the date');
+            if (date('Y-m-d', strtotime($date)) !== $date) {
+                throw new Exception('the date is not correct, ex: Y-m-d');
+            }
+            $start = $this->ask('Please enter the start time');
+            if (date('H:i:s', strtotime($start)) !== $start) {
+                throw new Exception('the start time is not correct, ex: H:i:s');
+            }
+            $end = $this->ask('Please enter the end time');
+            if (date('H:i:s', strtotime($end)) !== $end) {
+                throw new Exception('the end time is not correct, ex: H:i:s');
+            }
+            $dateStart = $date. 'T'. $start;
+            $dateEnd   = $date. 'T'. $end;
+            $getApi    = new GetApiService($this->apiRepository);
+            $getApi->insertAllData($dateStart, $dateEnd);
+        } catch (Exception $e) {
+            $this->error($e->getMessage());
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 ini_set('memory_limit', '-1');
 use App\Repositories\ApiRepository;
 use App\Jobs\Saveapi;
+use Curl;
 
 class GetApiService
 {
@@ -28,38 +29,31 @@ class GetApiService
      * @param
      */
 
-    public function getApi($num)
+    public function getApi($dateStart, $dateEnd, $num)
     {
-        // 初始化curl
-        $urlData = curl_init();
-        // 設置取得目標url
-        $url = 'http://train.rd6/?start=2018-12-07T10:11:11&end=2018-12-07T10:12:00&from='.$num;
-        // 設定url屬性
-        curl_setopt($urlData, CURLOPT_URL, $url);
-        curl_setopt($urlData, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($urlData);
-        $data   = json_decode($output, true);
-        curl_close($urlData);
+        $curl = new Curl\Curl();
+        $url  = 'http://train.rd6/?start='.$dateStart.'&end='.$dateEnd.'&from='.$num;
+        $curl->get($url);
+        $data = json_decode($curl->response, true);
+        curl_close($curl->curl);
         return $data;
     }
 
-    public function getAllData($data)
+    public function insertAllData($dateStart, $dateEnd)
     {
-        $apiTotal  = $data['hits']['total'];
-        $times  = ceil($apiTotal / 10000);
-        for ($i = 0; $i < $times; $i++) {
-            if ($i !== 0) {
-                $fromNumber = $i * 10000;
-                $data = $this->getApi($fromNumber);
-            }
+        $i = 0;
+        $countData = 10000;
+        do{
+            $fromNumber = $i * $countData;
+            $data = $this->getApi($dateStart, $dateEnd, $fromNumber);
             $this->createData($data['hits']['hits']);
-        }
+            $i++;
+        } while ( count($data['hits']['hits']) == $countData );
     }
 
     public function createData($data)
     {
         $apiData = array();
-        //$dataBox = array();
         foreach ($data as $key => $value) {
             $index          = $data[$key]['_index'];
             $type           = $data[$key]['_type'];

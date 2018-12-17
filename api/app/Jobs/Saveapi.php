@@ -42,12 +42,12 @@ class Saveapi implements ShouldQueue
         }
 
         $resultId = $this->apiRepository->apiSelect($dataId);
-        $lost = array_diff($dataId, $resultId);
+        $losts = array_diff($dataId, $resultId);
 
-        if (!empty($lost)) {
-            foreach ($lost as $value) {
-                $lostId = array_search($value, array_column($this->apiData, 'api_id'));
-                $dataBox[] = $this->apiData[$lostId];
+        if (!empty($losts)) {
+            foreach ($losts as $value) {
+                $lostsId = array_search($value, array_column($this->apiData, 'api_id'));
+                $dataBox[] = $this->apiData[$lostsId];
             }
             $this->apiRepository->apiInsert($dataBox);
         }

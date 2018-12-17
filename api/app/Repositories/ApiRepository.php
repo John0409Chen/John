@@ -19,14 +19,14 @@ class ApiRepository
         $this->api = $api;
     }
 
-    public function apiInsert($_array)
+    public function apiInsert($data)
     {
-        Api::insert($_array);
+        Api::insert($data);
     }
 
-    public function apiSelect($_array)
+    public function apiSelect($data)
     {
-        $result = Api::whereIn('api_id', $_array)->pluck('api_id')->toArray();
+        $result = Api::whereIn('api_id', $data)->pluck('api_id')->toArray();
         return $result;
     }
 }
